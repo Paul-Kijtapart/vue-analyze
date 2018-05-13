@@ -11,8 +11,11 @@
 <script>
   export default {
     name: "data-analysis",
+    props: {},
     data: function () {
       return {
+
+        // display updated data
         chartOptions: {
           xAxis: {},
           yAxis: {},
@@ -38,3 +41,9 @@
     }
   }
 </script>
+
+<style lang="scss">
+  .test {
+    color: red;
+  }
+</style>
