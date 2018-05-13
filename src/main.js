@@ -9,9 +9,11 @@ Vue.config.productionTip = false;
 import ECharts from 'vue-echarts/components/ECharts';
 
 // import ECharts modules manually to reduce bundle size
-import 'echarts/lib/component/tooltip';
+import 'echarts/lib/chart/line';
 import 'echarts/lib/chart/scatter'
 import 'echarts/lib/chart/effectScatter'
+
+import 'echarts/lib/component/tooltip';
 
 // register component to use
 Vue.component('chart', ECharts);
