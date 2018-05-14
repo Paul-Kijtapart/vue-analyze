@@ -16,56 +16,32 @@
   // libraries
   import SimpleLinearRegression from 'ml-regression-simple-linear';
 
-  // models
-  import {
-    TimeSeriesManager,
-    TimeSeries
-  } from "../models/index";
-
   export default {
     name: "data-analysis",
     props: {
-
-      // initial data
-      initialBaseline: {
-        type: Object,
-        required: true,
-        validator(initialBaseline) {
-          return initialBaseline.hasOwnProperty('series');
-        }
-      },
-      initialDriver: {
-        type: Object,
-        required: true,
-        validator(initialDriver) {
-          return initialDriver.hasOwnProperty('series');
-        }
-      }
-
+      datetimes: {
+        type: Array,
+        required: false
+      }, // e.g.
+      initialX: {
+        type: Array,
+        required: true
+      }, // e.g.  const x = [0.5, 1, 1.5, 2, 2.5];
+      initialY: {
+        type: Array,
+        required: true
+      }, // e.g.  const y = [0, 1, 2, 3, 4];
     },
     data: function () {
-
       return {
 
-        // copy of the passed-in data
-        driver: this.initialDriver,
-        baseline: this.initialBaseline,
+        x: this.initialX,
+        y: this.initialY,
 
-
-        // data to display graph
+        // display updated data
         chartOptions: {
-          xAxis: [
-            {
-              name: this.initialBaseline.name,
-              nameLocation: "middle"
-            }
-          ],
-          yAxis: [
-            {
-              name: this.initialDriver.name,
-              nameLocation: "middle"
-            }
-          ],
+          xAxis: {},
+          yAxis: {},
           series: [{
             symbolSize: 20,
             data: [],
@@ -75,72 +51,6 @@
       };
     },
     computed: {
-
-      overlappedPoints: function () {
-
-        let res = [];
-
-        let i = 0, j = 0;
-
-        let baseline_date_time = this.baseline.series.datetime;
-        let baseline_vals = this.baseline.series.val;
-
-
-        let driver_date_time = this.driver.series.datetime;
-        let driver_vals = this.driver.series.val;
-
-
-        while (i < baseline_date_time.length && j < driver_date_time.length) {
-
-          if (baseline_date_time[i] === driver_date_time[j]) {
-
-            // add to final result
-            res.push([
-              baseline_vals[i],
-              driver_vals[j],
-              baseline_date_time[i]
-            ]);
-
-            // update iteration
-            i += 1;
-            j += 1;
-          }
-          else if (baseline_date_time[i] > driver_date_time[j]) {
-
-            // update iteration
-            j += 1;
-          }
-          // if baseline_date_time[i] < driver_date_time[j]
-          else {
-
-            // update iteration
-            i += 1;
-          }
-        }
-
-
-        return res;
-      },
-
-      x: function () {
-        let vals = [];
-
-        this.overlappedPoints.forEach(point => {
-          vals.push(point[0]);
-        });
-
-        return vals;
-      },
-
-      y: function () {
-        let vals = [];
-
-        this.overlappedPoints.forEach(point => {
-          vals.push(point[1]);
-        });
-
-        return vals;
-      },
 
       scatterPoints: function () {
         let points = [];
@@ -169,7 +79,6 @@
           return [val, slope * val + intercept];
         })
       }
-
     },
     watch: {
 
@@ -178,7 +87,7 @@
         handler(newScatterPoints) {
           console.log('New scattered points : ', newScatterPoints, '\n');
 
-          // update series
+          // update chart visualization with new scatter points
           this.chartOptions.series[0].data = newScatterPoints;
 
         }
@@ -266,17 +175,15 @@
         // remove this point from both x and y
         let index = event.dataIndex;
 
-        // remove this clicked point from both baseline and driver
-        this.driver.series.datetime.splice(index, 1);
-        this.driver.series.val.splice(index, 1);
-
-        this.baseline.series.datetime.splice(index, 1);
-        this.baseline.series.val.splice(index, 1);
+        this.x.splice(index, 1);
+        this.y.splice(index, 1);
       }
     }
   }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+  .test {
+    color: red;
+  }
 </style>

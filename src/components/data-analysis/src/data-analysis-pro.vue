@@ -45,14 +45,21 @@
     },
     data: function () {
 
+      // create time serie manage to analyze multiple time series
+      let timeserieManager = new TimeSeriesManager();
+      let baselineTimeserie = TimeSeries.buildFromDTO(this.initialBaseline);
+      let driverTimeserie = TimeSeries.buildFromDTO(this.initialDriver);
+      timeserieManager.add(baselineTimeserie);
+      timeserieManager.add(driverTimeserie);
+
       return {
 
         // copy of the passed-in data
-        driver: this.initialDriver,
-        baseline: this.initialBaseline,
-
+        timeserieManager: timeserieManager,
 
         // data to display graph
+        scatterPoints: [],
+
         chartOptions: {
           xAxis: [
             {
@@ -76,56 +83,10 @@
     },
     computed: {
 
-      overlappedPoints: function () {
-
-        let res = [];
-
-        let i = 0, j = 0;
-
-        let baseline_date_time = this.baseline.series.datetime;
-        let baseline_vals = this.baseline.series.val;
-
-
-        let driver_date_time = this.driver.series.datetime;
-        let driver_vals = this.driver.series.val;
-
-
-        while (i < baseline_date_time.length && j < driver_date_time.length) {
-
-          if (baseline_date_time[i] === driver_date_time[j]) {
-
-            // add to final result
-            res.push([
-              baseline_vals[i],
-              driver_vals[j],
-              baseline_date_time[i]
-            ]);
-
-            // update iteration
-            i += 1;
-            j += 1;
-          }
-          else if (baseline_date_time[i] > driver_date_time[j]) {
-
-            // update iteration
-            j += 1;
-          }
-          // if baseline_date_time[i] < driver_date_time[j]
-          else {
-
-            // update iteration
-            i += 1;
-          }
-        }
-
-
-        return res;
-      },
-
       x: function () {
         let vals = [];
 
-        this.overlappedPoints.forEach(point => {
+        this.scatterPoints.forEach(point => {
           vals.push(point[0]);
         });
 
@@ -135,23 +96,11 @@
       y: function () {
         let vals = [];
 
-        this.overlappedPoints.forEach(point => {
+        this.scatterPoints.forEach(point => {
           vals.push(point[1]);
         });
 
         return vals;
-      },
-
-      scatterPoints: function () {
-        let points = [];
-
-        for (let i = 0; i < this.x.length; i++) {
-
-          points.push([this.x[i], this.y[i]]);
-
-        }
-
-        return points;
       },
 
       regression: function () {
@@ -172,6 +121,16 @@
 
     },
     watch: {
+
+      timeserieManager: {
+        immediate: true,
+        deep: true,
+        handler(newTimeserieManager) {
+          console.log("New timeserieManager : ", newTimeserieManager);
+
+          this.scatterPoints = newTimeserieManager.getScatterPoints();
+        }
+      },
 
       scatterPoints: {
         immediate: true,
@@ -264,14 +223,11 @@
         console.log(`Clicked event : `, event);
 
         // remove this point from both x and y
-        let index = event.dataIndex;
+        let point = event.data;
 
-        // remove this clicked point from both baseline and driver
-        this.driver.series.datetime.splice(index, 1);
-        this.driver.series.val.splice(index, 1);
+        let timestamp = point[2];
 
-        this.baseline.series.datetime.splice(index, 1);
-        this.baseline.series.val.splice(index, 1);
+        this.timeserieManager.removePointWithTimestamp(timestamp);
       }
     }
   }
