@@ -44,8 +44,8 @@
       // create time serie manage to analyze multiple time series
       let timeserieManager = new TimeSeriesManager();
 
-      timeserieManager.add(this.baseSerie);
       timeserieManager.add(this.driverSerie);
+      timeserieManager.add(this.baseSerie);
 
       return {
 
