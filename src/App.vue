@@ -9,9 +9,9 @@
     <!--:initialDriver="driver">-->
     <!--</data-analysis>-->
 
-    <pro-data-analysis :initialBaseline="baseline"
-                       :initialDriver="driver">
-    </pro-data-analysis>
+    <data-analysis :initialBaseline="happinessSerie"
+                   :initialDrivers="[foodSerie, travelSerie]">
+    </data-analysis>
 
   </div>
 </template>
@@ -34,16 +34,23 @@
     },
     data: function () {
       return {
-        baseline: {
-          name: 'My Baseline',
+        happinessSerie: {
+          name: 'Happiness',
           series: {
             datetime: [20, 30, 40, 50, 60, 70],
             val: [1, 2, 3, 4, 5, 6]
           }
         },
 
-        driver: {
-          name: 'My Driver',
+        foodSerie: {
+          name: 'Food',
+          series: {
+            datetime: [20, 30, 40, 50, 60, 70],
+            val: [4862.4, 5294.7, 5934.5, 7171.0, 8964.4, 20]
+          }
+        },
+        travelSerie: {
+          name: 'Travel',
           series: {
             datetime: [20, 30, 40, 50, 60, 70],
             val: [4862.4, 5294.7, 5934.5, 7171.0, 8964.4, 20]

@@ -1,11 +1,12 @@
 <template>
-  <div class="data-analysis">
+  <div class="serie-to-serie-analysis">
 
     <!-- Chart display -->
     <chart ref="chart"
            :options="chartOptions"
            :auto-resize="true"
-           @click="handleChartClick">
+           @click="handleChartClick"
+           class="serie-to-serie-analysis__chart">
     </chart>
 
   </div>
@@ -23,23 +24,18 @@
   } from "../models/index";
 
   export default {
-    name: "data-analysis",
+    name: "serie-to-serie-analysis",
     props: {
 
       // initial data
-      initialBaseline: {
-        type: Object,
-        required: true,
-        validator(initialBaseline) {
-          return initialBaseline.hasOwnProperty('series');
-        }
+      baseSerie: {
+        type: TimeSeries,
+        required: true
       },
-      initialDriver: {
-        type: Object,
-        required: true,
-        validator(initialDriver) {
-          return initialDriver.hasOwnProperty('series');
-        }
+
+      driverSerie: {
+        type: TimeSeries,
+        required: true
       }
 
     },
@@ -47,10 +43,9 @@
 
       // create time serie manage to analyze multiple time series
       let timeserieManager = new TimeSeriesManager();
-      let baselineTimeserie = TimeSeries.buildFromDTO(this.initialBaseline);
-      let driverTimeserie = TimeSeries.buildFromDTO(this.initialDriver);
-      timeserieManager.add(baselineTimeserie);
-      timeserieManager.add(driverTimeserie);
+
+      timeserieManager.add(this.baseSerie);
+      timeserieManager.add(this.driverSerie);
 
       return {
 
@@ -63,13 +58,13 @@
         chartOptions: {
           xAxis: [
             {
-              name: this.initialBaseline.name,
+              name: this.baseSerie.name,
               nameLocation: "middle"
             }
           ],
           yAxis: [
             {
-              name: this.initialDriver.name,
+              name: this.driverSerie.name,
               nameLocation: "middle"
             }
           ],
@@ -232,7 +227,3 @@
     }
   }
 </script>
-
-<style scoped>
-
-</style>

@@ -1,282 +1,80 @@
 <template>
   <div class="data-analysis">
 
-    <!-- Chart display -->
-    <chart ref="chart"
-           :options="chartOptions"
-           :auto-resize="true"
-           @click="handleChartClick">
-    </chart>
+    <div class="data-analysis__head">
+
+    </div>
+
+    <div class="data-analysis__body">
+
+      <div class="serie-to-serie-list">
+
+        <div v-for="driverSerie in driverSeries.timeSeriesList"
+             :key="driverSerie.id"
+             class="serie-to-serie-item">
+
+          <serie-to-serie :baseSerie="baseSerie"
+                          :driverSerie="driverSerie">
+          </serie-to-serie>
+
+        </div>
+      </div>
+
+    </div>
 
   </div>
 </template>
 
 <script>
 
-  // libraries
-  import SimpleLinearRegression from 'ml-regression-simple-linear';
-
   // models
   import {
     TimeSeriesManager,
     TimeSeries
   } from "../models/index";
+  import SerieToSerie from "./serie-to-serie";
 
   export default {
     name: "data-analysis",
+    components: {
+      SerieToSerie
+    },
     props: {
 
       // initial data
       initialBaseline: {
         type: Object,
         required: true,
-        validator(initialBaseline) {
-          return initialBaseline.hasOwnProperty('series');
-        }
       },
-      initialDriver: {
-        type: Object,
-        required: true,
-        validator(initialDriver) {
-          return initialDriver.hasOwnProperty('series');
+
+      initialDrivers: {
+        type: Array,
+        required: false,
+        default: function () {
+          return [];
         }
       }
 
     },
     data: function () {
 
+      // create time serie manage to analyze multiple time series
+      let timeserieManager = new TimeSeriesManager();
+
+      this.initialDrivers.forEach(driverOption => {
+        timeserieManager.add(TimeSeries.buildFromDTO(driverOption));
+      });
+
+
       return {
 
         // copy of the passed-in data
-        driver: this.initialDriver,
-        baseline: this.initialBaseline,
+        baseSerie: TimeSeries.buildFromDTO(this.initialBaseline),
 
+        driverSeries: timeserieManager
 
-        // data to display graph
-        chartOptions: {
-          xAxis: [
-            {
-              name: this.initialBaseline.name,
-              nameLocation: "middle"
-            }
-          ],
-          yAxis: [
-            {
-              name: this.initialDriver.name,
-              nameLocation: "middle"
-            }
-          ],
-          series: [{
-            symbolSize: 20,
-            data: [],
-            type: 'scatter'
-          }]
-        }
       };
-    },
-    computed: {
-
-      overlappedPoints: function () {
-
-        let res = [];
-
-        let i = 0, j = 0;
-
-        let baseline_date_time = this.baseline.series.datetime;
-        let baseline_vals = this.baseline.series.val;
-
-
-        let driver_date_time = this.driver.series.datetime;
-        let driver_vals = this.driver.series.val;
-
-
-        while (i < baseline_date_time.length && j < driver_date_time.length) {
-
-          if (baseline_date_time[i] === driver_date_time[j]) {
-
-            // add to final result
-            res.push([
-              baseline_vals[i],
-              driver_vals[j],
-              baseline_date_time[i]
-            ]);
-
-            // update iteration
-            i += 1;
-            j += 1;
-          }
-          else if (baseline_date_time[i] > driver_date_time[j]) {
-
-            // update iteration
-            j += 1;
-          }
-          // if baseline_date_time[i] < driver_date_time[j]
-          else {
-
-            // update iteration
-            i += 1;
-          }
-        }
-
-
-        return res;
-      },
-
-      x: function () {
-        let vals = [];
-
-        this.overlappedPoints.forEach(point => {
-          vals.push(point[0]);
-        });
-
-        return vals;
-      },
-
-      y: function () {
-        let vals = [];
-
-        this.overlappedPoints.forEach(point => {
-          vals.push(point[1]);
-        });
-
-        return vals;
-      },
-
-      scatterPoints: function () {
-        let points = [];
-
-        for (let i = 0; i < this.x.length; i++) {
-
-          points.push([this.x[i], this.y[i]]);
-
-        }
-
-        return points;
-      },
-
-      regression: function () {
-
-        return new SimpleLinearRegression(this.x, this.y);
-      },
-
-      regressionPoints: function () {
-
-        // calculate regression line's points based on the function, x, and y
-
-        let {slope, intercept, coefficients} = this.regression;
-
-        return this.x.map(val => {
-          return [val, slope * val + intercept];
-        })
-      }
-
-    },
-    watch: {
-
-      scatterPoints: {
-        immediate: true,
-        handler(newScatterPoints) {
-          console.log('New scattered points : ', newScatterPoints, '\n');
-
-          // update series
-          this.chartOptions.series[0].data = newScatterPoints;
-
-        }
-      },
-
-      regressionPoints: {
-        immediate: true,
-        handler(newRegressionPoints) {
-          console.log('New regression points :', newRegressionPoints, '\n');
-
-          // update chart options
-
-          // if there exists a regression line => update it
-          if (this.chartOptions.series.length > 1) {
-
-            // remove current one
-            this.chartOptions.series.splice(1, 1);
-
-            // add new one
-            this.chartOptions.series.push({
-              name: 'line',
-              type: 'line',
-              showSymbol: false,
-              smooth: true,
-              markPoint: {
-                itemStyle: {
-                  normal: {
-                    color: 'transparent'
-                  }
-                },
-                label: {
-                  normal: {
-                    show: true,
-                    position: 'left',
-                    textStyle: {
-                      color: '#333',
-                      fontSize: 14
-                    }
-                  }
-                },
-              },
-              data: this.regressionPoints,
-            });
-
-          }
-
-          // if there is no regression line => add it for the first time
-          else {
-            this.chartOptions.series.push({
-              name: 'line',
-              type: 'line',
-              showSymbol: false,
-              smooth: true,
-              markPoint: {
-                itemStyle: {
-                  normal: {
-                    color: 'transparent'
-                  }
-                },
-                label: {
-                  normal: {
-                    show: true,
-                    position: 'left',
-                    textStyle: {
-                      color: '#333',
-                      fontSize: 14
-                    }
-                  }
-                },
-              },
-              data: this.regressionPoints,
-            });
-          }
-        }
-      }
-
-    },
-    methods: {
-      // Handlers
-
-      handleChartClick: function (event) {
-
-        console.log(`Clicked event : `, event);
-
-        // remove this point from both x and y
-        let index = event.dataIndex;
-
-        // remove this clicked point from both baseline and driver
-        this.driver.series.datetime.splice(index, 1);
-        this.driver.series.val.splice(index, 1);
-
-        this.baseline.series.datetime.splice(index, 1);
-        this.baseline.series.val.splice(index, 1);
-      }
     }
   }
 </script>
 
-<style scoped>
-
-</style>
