@@ -7,6 +7,16 @@
 
     <div class="data-analysis__body">
 
+      <!-- timestamp to serie -->
+      <div class="timestamp-to-serie-wrapper">
+
+        <timestamp-to-serie-analysis :baseSerie="baseSerie"
+                                     :driverSeries="driverSeries">
+        </timestamp-to-serie-analysis>
+
+      </div>
+
+      <!-- serie to serie display -->
       <div class="serie-to-serie-list">
 
         <div v-for="driverSerie in driverSeries.timeSeriesList"
@@ -33,10 +43,12 @@
     TimeSeries
   } from "../models/index";
   import SerieToSerie from "./serie-to-serie";
+  import TimestampToSerieAnalysis from "./timestamp-to-serie";
 
   export default {
     name: "data-analysis",
     components: {
+      TimestampToSerieAnalysis,
       SerieToSerie
     },
     props: {

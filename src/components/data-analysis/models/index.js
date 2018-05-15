@@ -79,6 +79,27 @@ export class TimeSeries {
   }
 
   /**
+   * Return Echart options with data from this time serie
+   * @returns {Object}
+   */
+  getEchartSerie() {
+    return {
+      type: 'line',
+      data: this.points.map(point => point.value)
+    };
+  }
+
+  /**
+   * Return EchartAxis config
+   * @returns {Object}
+   */
+  getEchartAxis() {
+    return {
+      name: this.name,
+    };
+  }
+
+  /**
    * Return point with the given timestamp
    * @param {number} timestamp
    * @returns {Point}
@@ -107,7 +128,7 @@ export class TimeSeries {
    * Return list of timestamp in the state
    * @returns {number[]}
    */
-  getTimestamp() {
+  getTimestamps() {
     return Object.keys(this.timestampToPoint).map(timestampStr => parseInt(timestampStr));
   }
 
@@ -258,7 +279,7 @@ export class TimeSeriesManager {
     }
 
     // initial overlapped timestamp with first timeserie
-    let firstTimeserie = this.timeSeriesList[0].getTimestamp();
+    let firstTimeserie = this.timeSeriesList[0].getTimestamps();
 
     let overlappedTimestamp = new Set(firstTimeserie);
 
@@ -266,7 +287,7 @@ export class TimeSeriesManager {
 
       let updatedOverlappedTimestamp = new Set();
 
-      let currentTimestamps = this.timeSeriesList[i].getTimestamp();
+      let currentTimestamps = this.timeSeriesList[i].getTimestamps();
 
       currentTimestamps.forEach(timestamp => {
         if (overlappedTimestamp.has(timestamp)) {

@@ -56,6 +56,9 @@
         scatterPoints: [],
 
         chartOptions: {
+          title: {
+            text: "Series to Series"
+          },
           xAxis: [
             {
               name: this.baseSerie.name,
