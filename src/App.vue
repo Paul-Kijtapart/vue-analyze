@@ -17,20 +17,16 @@
 </template>
 
 <script>
-  import HelloWorld from './components/HelloWorld'
+
+  // models
   import {
-    DataAnalysis,
-    SimpleDataAnalysis,
-    ProDataAnalysis
+    DataAnalysis
   } from './components/data-analysis';
 
   export default {
     name: 'App',
     components: {
-      SimpleDataAnalysis,
-      DataAnalysis,
-      HelloWorld,
-      ProDataAnalysis
+      DataAnalysis
     },
     data: function () {
       return {
@@ -60,6 +56,3 @@
     }
   }
 </script>
-
-<style>
-</style>
